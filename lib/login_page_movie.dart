@@ -29,16 +29,13 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
   void _handleLogin() {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter email and password')),
       );
       return;
     }
-
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Logging in as $email...')));
+    Navigator.pushReplacementNamed(context, '/home');
   }
 
   @override
@@ -363,7 +360,9 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.pushNamed(context, '/signup');
+                        },
                         child: const Text(
                           'Create Account',
                           style: TextStyle(
