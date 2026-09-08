@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_theme.dart';
+
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -16,11 +18,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-
-  static const Color primaryRed = Color(0xFFE50914);
-  static const Color darkBg = Color(0xFF141414);
-  static const Color cardBg = Color(0xFF1F1F1F);
-  static const Color goldAccent = Color(0xFFFFC107);
 
   @override
   void dispose() {
@@ -43,7 +40,6 @@ class _SignUpPageState extends State<SignUpPage> {
       );
       return;
     }
-
     if (password != confirmPassword) {
       ScaffoldMessenger.of(
         context,
@@ -51,25 +47,19 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
-    // TODO: Replace with actual sign-up logic (API call / Firebase etc.)
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Account created for $name!')));
-
-    // Go back to Login page after successful sign up
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: darkBg,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: darkBg,
+        backgroundColor: AppColors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+        iconTheme: const IconThemeData(color: AppColors.darkNavy),
       ),
       body: SafeArea(
         child: Center(
@@ -85,7 +75,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     height: 72,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [primaryRed, Color(0xFFB0060F)],
+                        colors: [AppColors.lightBlue, AppColors.primaryBlue],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -103,55 +93,44 @@ class _SignUpPageState extends State<SignUpPage> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: AppColors.darkNavy,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Sign up to start booking movies',
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      color: Colors.white.withOpacity(0.55),
-                    ),
+                    'Join OneCloud Enterprise Platform',
+                    style: TextStyle(fontSize: 13.5, color: AppColors.textGrey),
                   ),
                   const SizedBox(height: 28),
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: cardBg,
+                      color: AppColors.surfaceGrey,
                       borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: Colors.white.withOpacity(0.06)),
+                      border: Border.all(color: AppColors.borderGrey),
                     ),
                     child: Column(
                       children: [
-                        // Name field
                         TextField(
                           controller: _nameController,
-                          style: const TextStyle(color: Colors.white),
                           decoration: _fieldDecoration(
                             hint: 'Full Name',
                             icon: Icons.person_outline,
                           ),
                         ),
                         const SizedBox(height: 16),
-
-                        // Email field
                         TextField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          style: const TextStyle(color: Colors.white),
                           decoration: _fieldDecoration(
                             hint: 'Email',
                             icon: Icons.email_outlined,
                           ),
                         ),
                         const SizedBox(height: 16),
-
-                        // Password field
                         TextField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
-                          style: const TextStyle(color: Colors.white),
                           decoration: _fieldDecoration(
                             hint: 'Password',
                             icon: Icons.lock_outline,
@@ -160,23 +139,18 @@ class _SignUpPageState extends State<SignUpPage> {
                                 _obscurePassword
                                     ? Icons.visibility_off_outlined
                                     : Icons.visibility_outlined,
-                                color: Colors.white.withOpacity(0.5),
+                                color: AppColors.textGrey,
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
+                              onPressed: () => setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 16),
-
-                        // Confirm Password field
                         TextField(
                           controller: _confirmPasswordController,
                           obscureText: _obscureConfirmPassword,
-                          style: const TextStyle(color: Colors.white),
                           decoration: _fieldDecoration(
                             hint: 'Confirm Password',
                             icon: Icons.lock_outline,
@@ -185,27 +159,23 @@ class _SignUpPageState extends State<SignUpPage> {
                                 _obscureConfirmPassword
                                     ? Icons.visibility_off_outlined
                                     : Icons.visibility_outlined,
-                                color: Colors.white.withOpacity(0.5),
+                                color: AppColors.textGrey,
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscureConfirmPassword =
-                                      !_obscureConfirmPassword;
-                                });
-                              },
+                              onPressed: () => setState(
+                                () => _obscureConfirmPassword =
+                                    !_obscureConfirmPassword,
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 24),
-
-                        // Sign Up button
                         SizedBox(
                           width: double.infinity,
                           height: 52,
                           child: ElevatedButton(
                             onPressed: _handleSignUp,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryRed,
+                              backgroundColor: AppColors.primaryBlue,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -225,8 +195,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Back to Login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -234,7 +202,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         "Already have an account? ",
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withOpacity(0.55),
+                          color: AppColors.textGrey,
                         ),
                       ),
                       GestureDetector(
@@ -243,8 +211,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           'Login',
                           style: TextStyle(
                             fontSize: 13,
-                            color: goldAccent,
-                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryBlue,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -266,18 +234,18 @@ class _SignUpPageState extends State<SignUpPage> {
   }) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.white.withOpacity(0.35)),
-      prefixIcon: Icon(icon, color: Colors.white.withOpacity(0.5)),
+      hintStyle: TextStyle(color: AppColors.textGrey.withOpacity(0.7)),
+      prefixIcon: Icon(icon, color: AppColors.textGrey),
       suffixIcon: suffix,
       filled: true,
-      fillColor: Colors.white.withOpacity(0.04),
+      fillColor: Colors.white,
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+        borderSide: const BorderSide(color: AppColors.borderGrey),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: primaryRed),
+        borderSide: const BorderSide(color: AppColors.primaryBlue),
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),

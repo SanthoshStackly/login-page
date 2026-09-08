@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 
-class MovieLoginPage extends StatefulWidget {
-  const MovieLoginPage({super.key});
+import 'app_theme.dart';
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<MovieLoginPage> createState() => _MovieLoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _MovieLoginPageState extends State<MovieLoginPage> {
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _rememberMe = false;
-
-  static const Color primaryRed = Color(0xFFE50914);
-  static const Color darkBg = Color(0xFF141414);
-  static const Color cardBg = Color(0xFF1F1F1F);
-  static const Color goldAccent = Color(0xFFFFC107);
 
   @override
   void dispose() {
@@ -29,19 +26,82 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
   void _handleLogin() {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
+
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter email and password')),
       );
       return;
     }
-    Navigator.pushReplacementNamed(context, '/home');
+
+    Navigator.pushNamed(context, '/otp', arguments: email);
+  }
+
+  void _handleForgotPassword() {
+    final resetEmailController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('Reset Password'),
+          content: TextField(
+            controller: resetEmailController,
+            decoration: InputDecoration(
+              hintText: 'Enter your email',
+              filled: true,
+              fillColor: AppColors.surfaceGrey,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Password reset link sent to your email'),
+                  ),
+                );
+              },
+              child: const Text('Send'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _handleGoogleSignIn() {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Signing in with Google...')));
+    Navigator.pushNamed(context, '/otp', arguments: 'google-user@onecloud.com');
+  }
+
+  void _handleAppleSignIn() {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Signing in with Apple...')));
+    Navigator.pushNamed(context, '/otp', arguments: 'apple-user@onecloud.com');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: darkBg,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -52,108 +112,67 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: 76,
-                    height: 76,
+                    width: 72,
+                    height: 72,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [primaryRed, Color(0xFFB0060F)],
+                        colors: [AppColors.lightBlue, AppColors.primaryBlue],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: primaryRed.withOpacity(0.4),
-                          blurRadius: 22,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
                     ),
                     child: const Icon(
-                      Icons.local_movies_rounded,
+                      Icons.cloud_rounded,
                       color: Colors.white,
-                      size: 36,
+                      size: 34,
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 16),
                   const Text(
-                    'CineGo',
+                    'Welcome Back',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
+                      color: AppColors.darkNavy,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Book your favorite movies in seconds',
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      color: Colors.white.withOpacity(0.55),
-                    ),
+                    'Login to your OneCloud account',
+                    style: TextStyle(fontSize: 13.5, color: AppColors.textGrey),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 28),
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: cardBg,
+                      color: AppColors.surfaceGrey,
                       borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: Colors.white.withOpacity(0.06)),
+                      border: Border.all(color: AppColors.borderGrey),
                     ),
                     child: Column(
                       children: [
                         TextField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: 'Email',
-                            hintStyle: TextStyle(
-                              color: Colors.white.withOpacity(0.35),
-                            ),
-                            prefixIcon: Icon(
-                              Icons.email_outlined,
-                              color: Colors.white.withOpacity(0.5),
-                            ),
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.04),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide(
-                                color: Colors.white.withOpacity(0.08),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: primaryRed),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide.none,
-                            ),
+                          decoration: _fieldDecoration(
+                            hint: 'Email',
+                            icon: Icons.email_outlined,
                           ),
                         ),
                         const SizedBox(height: 16),
                         TextField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: 'Password',
-                            hintStyle: TextStyle(
-                              color: Colors.white.withOpacity(0.35),
-                            ),
-                            prefixIcon: Icon(
-                              Icons.lock_outline,
-                              color: Colors.white.withOpacity(0.5),
-                            ),
-                            suffixIcon: IconButton(
+                          decoration: _fieldDecoration(
+                            hint: 'Password',
+                            icon: Icons.lock_outline,
+                            suffix: IconButton(
                               icon: Icon(
                                 _obscurePassword
                                     ? Icons.visibility_off_outlined
                                     : Icons.visibility_outlined,
-                                color: Colors.white.withOpacity(0.5),
+                                color: AppColors.textGrey,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -161,25 +180,9 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                                 });
                               },
                             ),
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.04),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide(
-                                color: Colors.white.withOpacity(0.08),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: primaryRed),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide.none,
-                            ),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -190,10 +193,7 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                                   height: 22,
                                   child: Checkbox(
                                     value: _rememberMe,
-                                    activeColor: primaryRed,
-                                    side: BorderSide(
-                                      color: Colors.white.withOpacity(0.3),
-                                    ),
+                                    activeColor: AppColors.primaryBlue,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(4),
                                     ),
@@ -205,17 +205,17 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
+                                const Text(
                                   'Remember me',
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.white.withOpacity(0.75),
+                                    color: AppColors.textDark,
                                   ),
                                 ),
                               ],
                             ),
                             TextButton(
-                              onPressed: () {},
+                              onPressed: _handleForgotPassword,
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
                                 minimumSize: Size.zero,
@@ -224,7 +224,7 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                               child: const Text(
                                 'Forgot Password?',
                                 style: TextStyle(
-                                  color: goldAccent,
+                                  color: AppColors.primaryBlue,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
                                 ),
@@ -239,7 +239,7 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                           child: ElevatedButton(
                             onPressed: _handleLogin,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryRed,
+                              backgroundColor: AppColors.primaryBlue,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -259,9 +259,7 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                         Row(
                           children: [
                             Expanded(
-                              child: Divider(
-                                color: Colors.white.withOpacity(0.1),
-                              ),
+                              child: Divider(color: AppColors.borderGrey),
                             ),
                             Padding(
                               padding: const EdgeInsets.symmetric(
@@ -270,15 +268,13 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                               child: Text(
                                 'OR',
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.35),
+                                  color: AppColors.textGrey,
                                   fontSize: 12,
                                 ),
                               ),
                             ),
                             Expanded(
-                              child: Divider(
-                                color: Colors.white.withOpacity(0.1),
-                              ),
+                              child: Divider(color: AppColors.borderGrey),
                             ),
                           ],
                         ),
@@ -287,7 +283,7 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                           children: [
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: () {},
+                                onPressed: _handleGoogleSignIn,
                                 icon: const Text(
                                   'G',
                                   style: TextStyle(
@@ -296,18 +292,16 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                                     color: Colors.redAccent,
                                   ),
                                 ),
-                                label: Text(
+                                label: const Text(
                                   'Google',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
-                                  ),
+                                  style: TextStyle(color: AppColors.textDark),
                                 ),
                                 style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 14,
                                   ),
-                                  side: BorderSide(
-                                    color: Colors.white.withOpacity(0.1),
+                                  side: const BorderSide(
+                                    color: AppColors.borderGrey,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
@@ -318,24 +312,22 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: () {},
-                                icon: Icon(
+                                onPressed: _handleAppleSignIn,
+                                icon: const Icon(
                                   Icons.apple,
                                   size: 20,
-                                  color: Colors.white.withOpacity(0.8),
+                                  color: AppColors.textDark,
                                 ),
-                                label: Text(
+                                label: const Text(
                                   'Apple',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
-                                  ),
+                                  style: TextStyle(color: AppColors.textDark),
                                 ),
                                 style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 14,
                                   ),
-                                  side: BorderSide(
-                                    color: Colors.white.withOpacity(0.1),
+                                  side: const BorderSide(
+                                    color: AppColors.borderGrey,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
@@ -356,19 +348,17 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                         "New here? ",
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withOpacity(0.55),
+                          color: AppColors.textGrey,
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/signup');
-                        },
+                        onTap: () => Navigator.pushNamed(context, '/signup'),
                         child: const Text(
                           'Create Account',
                           style: TextStyle(
                             fontSize: 13,
-                            color: goldAccent,
-                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryBlue,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -376,17 +366,41 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    '© 2026 CineGo. All rights reserved.',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.white.withOpacity(0.3),
-                    ),
+                    '© 2026 OneCloud Enterprise Platform',
+                    style: TextStyle(fontSize: 11, color: AppColors.textGrey),
                   ),
                 ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _fieldDecoration({
+    required String hint,
+    required IconData icon,
+    Widget? suffix,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: AppColors.textGrey.withOpacity(0.7)),
+      prefixIcon: Icon(icon, color: AppColors.textGrey),
+      suffixIcon: suffix,
+      filled: true,
+      fillColor: Colors.white,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.borderGrey),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.primaryBlue),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
       ),
     );
   }
