@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
 
+// ------------------------------------------------------------
+// OTP Verification Page - Two-Step Authentication
+// Copy this file into your project's lib/ folder as otp_page.dart
+// ------------------------------------------------------------
+
 class OtpPage extends StatefulWidget {
   const OtpPage({super.key});
 
@@ -35,6 +40,7 @@ class _OtpPageState extends State<OtpPage> {
       );
       return;
     }
+    // TODO: Replace with real OTP verification against backend
     Navigator.pushReplacementNamed(context, '/home');
   }
 
@@ -91,81 +97,90 @@ class _OtpPageState extends State<OtpPage> {
                     ),
                   ),
                   const SizedBox(height: 32),
+
+                  // OTP boxes
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(4, (index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: SizedBox(
-                          width: 56,
-                          height: 60,
-                          child: TextField(
-                            controller: _controllers[index],
-                            focusNode: _focusNodes[index],
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                            maxLength: 1,
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.darkNavy,
-                            ),
-                            decoration: InputDecoration(
-                              counterText: '',
-                              filled: true,
-                              fillColor: AppColors.surfaceGrey,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.borderGrey,
+                      return _FadeSlideIn(
+                        delayMs: index * 100,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: SizedBox(
+                            width: 56,
+                            height: 60,
+                            child: TextField(
+                              controller: _controllers[index],
+                              focusNode: _focusNodes[index],
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.number,
+                              maxLength: 1,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkNavy,
+                              ),
+                              decoration: InputDecoration(
+                                counterText: '',
+                                filled: true,
+                                fillColor: AppColors.surfaceGrey,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.borderGrey,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.primaryBlue,
+                                    width: 2,
+                                  ),
                                 ),
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.primaryBlue,
-                                  width: 2,
-                                ),
-                              ),
+                              onChanged: (value) {
+                                if (value.isNotEmpty && index < 3) {
+                                  FocusScope.of(context)
+                                      .requestFocus(_focusNodes[index + 1]);
+                                } else if (value.isEmpty && index > 0) {
+                                  FocusScope.of(context)
+                                      .requestFocus(_focusNodes[index - 1]);
+                                }
+                              },
                             ),
-                            onChanged: (value) {
-                              if (value.isNotEmpty && index < 3) {
-                                FocusScope.of(context)
-                                    .requestFocus(_focusNodes[index + 1]);
-                              } else if (value.isEmpty && index > 0) {
-                                FocusScope.of(context)
-                                    .requestFocus(_focusNodes[index - 1]);
-                              }
-                            },
                           ),
                         ),
                       );
                     }),
                   ),
                   const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: _handleVerify,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryBlue,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+
+                  _HoverScale(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: _handleVerify,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryBlue,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
                         ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Verify',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                        child: const Text(
+                          'Verify',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
+
                   TextButton(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -186,6 +201,85 @@ class _OtpPageState extends State<OtpPage> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---- Local animation helpers (no external file needed) ----
+class _FadeSlideIn extends StatefulWidget {
+  final Widget child;
+  final int delayMs;
+  const _FadeSlideIn({required this.child, this.delayMs = 0});
+
+  @override
+  State<_FadeSlideIn> createState() => _FadeSlideInState();
+}
+
+class _FadeSlideInState extends State<_FadeSlideIn> {
+  bool _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: widget.delayMs), () {
+      if (mounted) setState(() => _visible = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: _visible ? 1 : 0,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOut,
+      child: AnimatedSlide(
+        offset: _visible ? Offset.zero : const Offset(0, 0.08),
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeOut,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class _HoverScale extends StatefulWidget {
+  final Widget child;
+  final double scale;
+  const _HoverScale({required this.child, this.scale = 1.03});
+
+  @override
+  State<_HoverScale> createState() => _HoverScaleState();
+}
+
+class _HoverScaleState extends State<_HoverScale> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: AnimatedScale(
+        scale: _hovering ? widget.scale : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: _hovering
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.12),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ]
+                : [],
+          ),
+          child: widget.child,
         ),
       ),
     );

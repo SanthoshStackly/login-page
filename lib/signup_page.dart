@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
 
+// ------------------------------------------------------------
+// Sign Up Page - OneCloud Enterprise Platform (White & Blue theme)
+// Copy this file into your project's lib/ folder as signup_page.dart
+// ------------------------------------------------------------
+
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -47,6 +52,9 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
+    // TODO: Replace with real sign-up logic (API call / Firebase etc.)
+    UserSession.name = name;
+    UserSession.email = email;
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Account created for $name!')));
     Navigator.pop(context);
@@ -67,158 +75,163 @@ class _SignUpPageState extends State<SignUpPage> {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.lightBlue, AppColors.primaryBlue],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+              child: _FadeSlideIn(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppColors.lightBlue, AppColors.primaryBlue],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      borderRadius: BorderRadius.circular(20),
+                      child: const Icon(
+                        Icons.person_add_alt_1_rounded,
+                        color: Colors.white,
+                        size: 32,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.person_add_alt_1_rounded,
-                      color: Colors.white,
-                      size: 32,
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Create Account',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkNavy,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Create Account',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.darkNavy,
+                    const SizedBox(height: 6),
+                    Text(
+                      'Join OneCloud Enterprise Platform',
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        color: AppColors.textGrey,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Join OneCloud Enterprise Platform',
-                    style: TextStyle(fontSize: 13.5, color: AppColors.textGrey),
-                  ),
-                  const SizedBox(height: 28),
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceGrey,
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: AppColors.borderGrey),
+                    const SizedBox(height: 28),
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceGrey,
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(color: AppColors.borderGrey),
+                      ),
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: _nameController,
+                            decoration: _fieldDecoration(
+                              hint: 'Full Name',
+                              icon: Icons.person_outline,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: _fieldDecoration(
+                              hint: 'Email',
+                              icon: Icons.email_outlined,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: _fieldDecoration(
+                              hint: 'Password',
+                              icon: Icons.lock_outline,
+                              suffix: IconButton(
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: AppColors.textGrey,
+                                ),
+                                onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: _confirmPasswordController,
+                            obscureText: _obscureConfirmPassword,
+                            decoration: _fieldDecoration(
+                              hint: 'Confirm Password',
+                              icon: Icons.lock_outline,
+                              suffix: IconButton(
+                                icon: Icon(
+                                  _obscureConfirmPassword
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: AppColors.textGrey,
+                                ),
+                                onPressed: () => setState(
+                                  () => _obscureConfirmPassword =
+                                      !_obscureConfirmPassword,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton(
+                              onPressed: _handleSignUp,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primaryBlue,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: const Text(
+                                'Sign Up',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Column(
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        TextField(
-                          controller: _nameController,
-                          decoration: _fieldDecoration(
-                            hint: 'Full Name',
-                            icon: Icons.person_outline,
+                        Text(
+                          "Already have an account? ",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textGrey,
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: _fieldDecoration(
-                            hint: 'Email',
-                            icon: Icons.email_outlined,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          decoration: _fieldDecoration(
-                            hint: 'Password',
-                            icon: Icons.lock_outline,
-                            suffix: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: AppColors.textGrey,
-                              ),
-                              onPressed: () => setState(
-                                () => _obscurePassword = !_obscurePassword,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _confirmPasswordController,
-                          obscureText: _obscureConfirmPassword,
-                          decoration: _fieldDecoration(
-                            hint: 'Confirm Password',
-                            icon: Icons.lock_outline,
-                            suffix: IconButton(
-                              icon: Icon(
-                                _obscureConfirmPassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: AppColors.textGrey,
-                              ),
-                              onPressed: () => setState(
-                                () => _obscureConfirmPassword =
-                                    !_obscureConfirmPassword,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton(
-                            onPressed: _handleSignUp,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryBlue,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: const Text(
-                              'Sign Up',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Text(
+                            'Login',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.primaryBlue,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Already have an account? ",
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textGrey,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.primaryBlue,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -250,6 +263,85 @@ class _SignUpPageState extends State<SignUpPage> {
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
+      ),
+    );
+  }
+}
+
+// ---- Local animation helpers (no external file needed) ----
+class _FadeSlideIn extends StatefulWidget {
+  final Widget child;
+  final int delayMs;
+  const _FadeSlideIn({required this.child, this.delayMs = 0});
+
+  @override
+  State<_FadeSlideIn> createState() => _FadeSlideInState();
+}
+
+class _FadeSlideInState extends State<_FadeSlideIn> {
+  bool _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: widget.delayMs), () {
+      if (mounted) setState(() => _visible = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: _visible ? 1 : 0,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOut,
+      child: AnimatedSlide(
+        offset: _visible ? Offset.zero : const Offset(0, 0.08),
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeOut,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class _HoverScale extends StatefulWidget {
+  final Widget child;
+  final double scale;
+  const _HoverScale({required this.child, this.scale = 1.03});
+
+  @override
+  State<_HoverScale> createState() => _HoverScaleState();
+}
+
+class _HoverScaleState extends State<_HoverScale> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: AnimatedScale(
+        scale: _hovering ? widget.scale : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: _hovering
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.12),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ]
+                : [],
+          ),
+          child: widget.child,
+        ),
       ),
     );
   }
