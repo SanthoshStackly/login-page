@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'app_theme.dart';
+import '../app_theme.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
@@ -18,65 +18,12 @@ class LandingPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 96,
-                    height: 96,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.lightBlue, AppColors.primaryBlue],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(26),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryBlue.withOpacity(0.25),
-                          blurRadius: 24,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.cloud_rounded,
-                      color: Colors.white,
-                      size: 50,
-                    ),
+                  Image.asset(
+                    'assets/images/onecloud_logo.png',
+                    height: 80,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 26),
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: const TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'One',
-                          style: TextStyle(
-                            color: AppColors.darkNavy,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'Cloud',
-                          style: TextStyle(
-                            color: AppColors.primaryBlue,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'ENTERPRISE PLATFORM',
-                    style: TextStyle(
-                      color: AppColors.lightBlue,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
                   Text(
                     'Manage your enterprise operations,\nteam and projects — all in one place.',
                     textAlign: TextAlign.center,
@@ -91,9 +38,7 @@ class LandingPage extends StatelessWidget {
                     width: double.infinity,
                     height: 54,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/login');
-                      },
+                      onPressed: () => Navigator.pushNamed(context, '/login'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryBlue,
                         foregroundColor: Colors.white,

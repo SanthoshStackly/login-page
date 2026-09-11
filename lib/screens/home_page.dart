@@ -1,113 +1,111 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'app_theme.dart';
-import 'routes/app_routes.dart';
-import 'platform_services_section.dart';
-import 'service_detail_page.dart';
+import '../app_theme.dart';
+import '../routes/app_routes.dart';
+import '../models/service_data.dart';
+import '../providers/dashboard_provider.dart';
+import '../widgets/platform_services_section.dart';
+import '../widgets/service_content.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  bool _sidebarOpen = false; // starts CLOSED - opens on menu click
-  String _searchQuery = '';
-
-  void _openService(ServiceData service) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => ServiceDetailPage(service: service)),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Row(
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeInOut,
-            width: _sidebarOpen ? 260 : 0,
-            clipBehavior: Clip.hardEdge,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(right: BorderSide(color: AppColors.borderGrey)),
-            ),
-            child: _sidebarOpen
-                ? _buildSidebar(context)
-                : const SizedBox.shrink(),
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                _buildNavbar(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(28),
-                    child: _buildDashboardContent(),
+      body: Consumer<DashboardProvider>(
+        builder: (context, provider, _) {
+          return Row(
+            children: [
+              // ---------------- SIDEBAR ----------------
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 280),
+                curve: Curves.easeInOut,
+                width: provider.sidebarOpen ? 270 : 0,
+                clipBehavior: Clip.hardEdge,
+                decoration: const BoxDecoration(
+                  color: AppColors.surfaceGrey,
+                  border: Border(
+                    right: BorderSide(color: AppColors.borderGrey),
                   ),
                 ),
-                _buildFooter(),
-              ],
-            ),
-          ),
-        ],
+                child: provider.sidebarOpen
+                    ? _buildSidebar(context, provider)
+                    : const SizedBox.shrink(),
+              ),
+
+              // ---------------- MAIN AREA ----------------
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildNavbar(context, provider),
+
+                    // Sticky heading - stays fixed while content below scrolls
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(28, 20, 28, 16),
+                      color: Colors.white,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            provider.headingTitle,
+                            style: const TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            provider.headingSubtitle,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              color: AppColors.textGrey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+
+                    // Scrollable content only
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(28, 20, 28, 28),
+                        child: _buildContent(context, provider),
+                      ),
+                    ),
+
+                    _buildFooter(),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   // ============== SIDEBAR ==============
-  Widget _buildSidebar(BuildContext context) {
+  Widget _buildSidebar(BuildContext context, DashboardProvider provider) {
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+            color: Colors.white,
             child: Row(
               children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.lightBlue, AppColors.primaryBlue],
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.cloud_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'OneCloud',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: AppColors.primaryBlue,
-                        ),
-                      ),
-                      Text(
-                        'Enterprise Platform',
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          color: AppColors.textGrey,
-                        ),
-                      ),
-                    ],
-                  ),
+                Image.asset(
+                  'assets/images/onecloud_logo.png',
+                  height: 30,
+                  fit: BoxFit.contain,
                 ),
               ],
             ),
@@ -115,23 +113,59 @@ class _HomePageState extends State<HomePage> {
           const Divider(height: 1),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 4),
               children: [
-                _navItem(
-                  Icons.dashboard_rounded,
-                  'Dashboard',
-                  selected: true,
-                  onTap: () {
-                    setState(() => _sidebarOpen = false);
-                  },
+                _flatItem(
+                  icon: Icons.dashboard_rounded,
+                  label: 'Dashboard',
+                  selected: provider.selectedService == null,
+                  onTap: () => provider.selectDashboard(),
                 ),
-                _sectionLabel('SERVICES'),
-                ...kPlatformServices.map(
-                  (s) =>
-                      _navItem(s.icon, s.title, onTap: () => _openService(s)),
+                ExpansionTile(
+                  initiallyExpanded: true,
+                  title: const Text(
+                    'SERVICES',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textGrey,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                  childrenPadding: EdgeInsets.zero,
+                  tilePadding: const EdgeInsets.symmetric(horizontal: 20),
+                  children: kPlatformServices.map((s) {
+                    final selected = provider.selectedService?.title == s.title;
+                    return _flatItem(
+                      icon: s.icon,
+                      label: s.title,
+                      selected: selected,
+                      dense: true,
+                      onTap: () => provider.selectService(s),
+                    );
+                  }).toList(),
                 ),
-                _sectionLabel('SYSTEM'),
-                _navItem(Icons.settings_outlined, 'Settings', onTap: () {}),
+                ExpansionTile(
+                  initiallyExpanded: false,
+                  title: const Text(
+                    'SYSTEM',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textGrey,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                  childrenPadding: EdgeInsets.zero,
+                  tilePadding: const EdgeInsets.symmetric(horizontal: 20),
+                  children: [
+                    _flatItem(
+                      icon: Icons.settings_outlined,
+                      label: 'Settings',
+                      onTap: () {},
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -206,117 +240,102 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _sectionLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 6),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 11,
-          color: AppColors.textGrey,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.6,
-        ),
-      ),
-    );
-  }
-
-  Widget _navItem(
-    IconData icon,
-    String label, {
-    bool selected = false,
+  Widget _flatItem({
+    required IconData icon,
+    required String label,
     required VoidCallback onTap,
+    bool selected = false,
+    bool dense = false,
   }) {
     return _HoverNavItem(
       icon: icon,
       label: label,
       selected: selected,
       onTap: onTap,
+      dense: dense,
     );
   }
 
   // ============== NAVBAR ==============
-  Widget _buildNavbar() {
+  Widget _buildNavbar(BuildContext context, DashboardProvider provider) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: AppColors.borderGrey)),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      color: AppColors.darkNavy,
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.menu_rounded, color: AppColors.darkNavy),
-            onPressed: () => setState(() => _sidebarOpen = !_sidebarOpen),
+            icon: const Icon(Icons.menu_rounded, color: Colors.white),
+            onPressed: () => provider.toggleSidebar(),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Container(
-              height: 42,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceGrey,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.search, color: AppColors.textGrey, size: 20),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      onChanged: (value) =>
-                          setState(() => _searchQuery = value),
-                      decoration: InputDecoration(
-                        hintText: 'Search employees, customers, documents...',
-                        hintStyle: TextStyle(
-                          color: AppColors.textGrey,
-                          fontSize: 13.5,
-                        ),
-                        border: InputBorder.none,
-                        isDense: true,
+          const SizedBox(width: 6),
+          // Compact search bar - fixed small width, not stretched
+          Container(
+            width: 260,
+            height: 38,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.search,
+                  color: Colors.white.withOpacity(0.7),
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    onChanged: (value) => provider.setSearchQuery(value),
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    decoration: InputDecoration(
+                      hintText: 'Search services...',
+                      hintStyle: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 13,
                       ),
+                      border: InputBorder.none,
+                      isDense: true,
                     ),
                   ),
-                  if (_searchQuery.isNotEmpty)
-                    GestureDetector(
-                      onTap: () => setState(() => _searchQuery = ''),
-                      child: Icon(
-                        Icons.close_rounded,
-                        color: AppColors.textGrey,
-                        size: 18,
-                      ),
+                ),
+                if (provider.searchQuery.isNotEmpty)
+                  GestureDetector(
+                    onTap: () => provider.setSearchQuery(''),
+                    child: Icon(
+                      Icons.close_rounded,
+                      color: Colors.white.withOpacity(0.7),
+                      size: 16,
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           ),
-          const SizedBox(width: 16),
+          const Spacer(),
           IconButton(
             icon: const Icon(
               Icons.notifications_none_rounded,
-              color: AppColors.darkNavy,
+              color: Colors.white,
             ),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(
-              Icons.auto_awesome_rounded,
-              color: AppColors.primaryBlue,
-            ),
+            icon: const Icon(Icons.auto_awesome_rounded, color: Colors.white),
             onPressed: () {},
           ),
           const SizedBox(width: 6),
           Row(
             children: [
               CircleAvatar(
-                radius: 16,
-                backgroundColor: AppColors.primaryBlue,
+                radius: 14,
+                backgroundColor: AppColors.lightBlue,
                 child: Text(
                   UserSession.initials,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 11,
+                    fontSize: 10,
                   ),
                 ),
               ),
@@ -325,12 +344,14 @@ class _HomePageState extends State<HomePage> {
                 UserSession.name,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textDark,
+                  color: Colors.white,
+                  fontSize: 13,
                 ),
               ),
               const Icon(
                 Icons.keyboard_arrow_down_rounded,
-                color: AppColors.textGrey,
+                color: Colors.white70,
+                size: 18,
               ),
             ],
           ),
@@ -343,8 +364,8 @@ class _HomePageState extends State<HomePage> {
   Widget _buildFooter() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: const BoxDecoration(color: AppColors.darkNavy),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      color: AppColors.darkNavy,
       child: Text(
         '© 2026 OneCloud Enterprise Platform. All rights reserved.',
         textAlign: TextAlign.center,
@@ -357,32 +378,22 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ============== DASHBOARD CONTENT ==============
-  Widget _buildDashboardContent() {
-    // If the user is searching, show only the filtered services list -
-    // this makes the search bar feel functional and focused.
-    if (_searchQuery.trim().isNotEmpty) {
-      return PlatformServicesSection(searchQuery: _searchQuery);
+  // ============== SCROLLABLE CONTENT ==============
+  Widget _buildContent(BuildContext context, DashboardProvider provider) {
+    // Search overrides everything - shows filtered services
+    if (provider.searchQuery.trim().isNotEmpty) {
+      return PlatformServicesSection(searchQuery: provider.searchQuery);
     }
 
+    // A specific service was clicked - show its content inline
+    if (provider.selectedService != null) {
+      return ServiceContent(service: provider.selectedService!);
+    }
+
+    // Default: full dashboard view
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Dashboard',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Welcome to OneCloud Enterprise Platform',
-          style: TextStyle(fontSize: 14, color: AppColors.textGrey),
-        ),
-        const SizedBox(height: 24),
-
         LayoutBuilder(
           builder: (context, constraints) {
             final isWide = constraints.maxWidth > 900;
@@ -446,18 +457,11 @@ class _HomePageState extends State<HomePage> {
           },
         ),
         const SizedBox(height: 24),
-
         LayoutBuilder(
           builder: (context, constraints) {
             final isWide = constraints.maxWidth > 900;
-            final salesPipeline = _FadeSlideInLocal(
-              delayMs: 400,
-              child: _buildSalesPipeline(),
-            );
-            final pendingApprovals = _FadeSlideInLocal(
-              delayMs: 500,
-              child: _buildPendingApprovals(),
-            );
+            final salesPipeline = _buildSalesPipeline();
+            final pendingApprovals = _buildPendingApprovals();
             return isWide
                 ? Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -490,51 +494,48 @@ class _HomePageState extends State<HomePage> {
     IconData icon,
     Color color,
   ) {
-    return _FadeSlideInLocal(
-      delayMs: index * 100,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.borderGrey),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 13.5, color: AppColors.textGrey),
-                ),
-                Icon(icon, color: color, size: 20),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withOpacity(0.12), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(fontSize: 13.5, color: AppColors.textGrey),
               ),
+              Icon(icon, color: color, size: 20),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textDark,
             ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: TextStyle(fontSize: 12, color: AppColors.textGrey),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: TextStyle(fontSize: 12, color: AppColors.textGrey),
+          ),
+        ],
       ),
     );
   }
@@ -551,7 +552,7 @@ class _HomePageState extends State<HomePage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderGrey),
+        border: Border.all(color: Colors.black.withOpacity(0.12), width: 1.2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -588,7 +589,22 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  _AnimatedProgressBarLocal(percent: item['percent'] as double),
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: item['percent'] as double),
+                    duration: const Duration(milliseconds: 900),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, _) => ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value: value,
+                        minHeight: 8,
+                        backgroundColor: AppColors.borderGrey,
+                        valueColor: const AlwaysStoppedAnimation(
+                          AppColors.primaryBlue,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -626,7 +642,7 @@ class _HomePageState extends State<HomePage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderGrey),
+        border: Border.all(color: Colors.black.withOpacity(0.12), width: 1.2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -707,12 +723,14 @@ class _HoverNavItem extends StatefulWidget {
   final IconData icon;
   final String label;
   final bool selected;
+  final bool dense;
   final VoidCallback onTap;
   const _HoverNavItem({
     required this.icon,
     required this.label,
     required this.onTap,
     this.selected = false,
+    this.dense = false,
   });
 
   @override
@@ -732,7 +750,10 @@ class _HoverNavItemState extends State<_HoverNavItem> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+          margin: EdgeInsets.symmetric(
+            horizontal: widget.dense ? 10 : 10,
+            vertical: 1,
+          ),
           decoration: BoxDecoration(
             color: active
                 ? AppColors.primaryBlue.withOpacity(
@@ -745,13 +766,13 @@ class _HoverNavItemState extends State<_HoverNavItem> {
             dense: true,
             leading: Icon(
               widget.icon,
-              size: 20,
+              size: 19,
               color: active ? AppColors.primaryBlue : AppColors.textGrey,
             ),
             title: Text(
               widget.label,
               style: TextStyle(
-                fontSize: 13.5,
+                fontSize: 13,
                 color: active ? AppColors.primaryBlue : AppColors.textDark,
                 fontWeight: widget.selected
                     ? FontWeight.w700
@@ -761,68 +782,6 @@ class _HoverNavItemState extends State<_HoverNavItem> {
           ),
         ),
       ),
-    );
-  }
-}
-
-// ============== LOCAL ANIMATION HELPERS ==============
-class _FadeSlideInLocal extends StatefulWidget {
-  final Widget child;
-  final int delayMs;
-  const _FadeSlideInLocal({required this.child, this.delayMs = 0});
-
-  @override
-  State<_FadeSlideInLocal> createState() => _FadeSlideInLocalState();
-}
-
-class _FadeSlideInLocalState extends State<_FadeSlideInLocal> {
-  bool _visible = false;
-
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(Duration(milliseconds: widget.delayMs), () {
-      if (mounted) setState(() => _visible = true);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      opacity: _visible ? 1 : 0,
-      duration: const Duration(milliseconds: 450),
-      curve: Curves.easeOut,
-      child: AnimatedSlide(
-        offset: _visible ? Offset.zero : const Offset(0, 0.08),
-        duration: const Duration(milliseconds: 450),
-        curve: Curves.easeOut,
-        child: widget.child,
-      ),
-    );
-  }
-}
-
-class _AnimatedProgressBarLocal extends StatelessWidget {
-  final double percent;
-  const _AnimatedProgressBarLocal({required this.percent});
-
-  @override
-  Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: percent),
-      duration: const Duration(milliseconds: 900),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, _) {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: LinearProgressIndicator(
-            value: value,
-            minHeight: 8,
-            backgroundColor: AppColors.borderGrey,
-            valueColor: const AlwaysStoppedAnimation(AppColors.primaryBlue),
-          ),
-        );
-      },
     );
   }
 }
