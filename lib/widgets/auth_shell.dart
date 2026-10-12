@@ -2,12 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
 
-// ------------------------------------------------------------
-// AuthShell - common layout for Sign-in and Sign-up.
-//   Wide screens  (>= 900px): dark brand panel on the left + form on the right
-//   Mobile screens (< 900px): brand panel hidden, compact logo on top of the form
-// ------------------------------------------------------------
-
 const Color _kBlue = Color(0xFF2F6FE0);
 const Color _kBlueLight = Color(0xFF6EA8FF);
 

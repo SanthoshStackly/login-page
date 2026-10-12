@@ -11,12 +11,6 @@ import '../widgets/admin_section_content.dart';
 
 const double kMobileBreakpoint = 700;
 
-// ------------------------------------------------------------
-// Full Platform Administration sidebar structure - one entry per
-// collapsible group, each with its own list of real sub-items.
-// Clicking any sub-item (or the group's own matching overview item)
-// opens AdminSectionContent for that label inline in the dashboard.
-// ------------------------------------------------------------
 class _AdminGroupData {
   final IconData icon;
   final String label;

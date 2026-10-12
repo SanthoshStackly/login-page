@@ -4,13 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../routes/app_routes.dart';
 
-// ------------------------------------------------------------
-// LandingPage - first screen shown before Sign In.
-// Fully responsive (mobile / tablet / desktop breakpoints).
-// Desktop layout is wrapped in a scroll view with fixed spacing
-// (instead of Spacer) so it never overflows on short windows.
-// ------------------------------------------------------------
-
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
 
