@@ -3,22 +3,16 @@ import 'package:flutter/material.dart';
 import '../app_theme.dart';
 import '../models/service_data.dart';
 
-// ------------------------------------------------------------
-// ServiceContent - rich inline view shown when a sidebar service
-// (HRM, CRM, etc.) is clicked. Shown inside the dashboard's
-// scrollable content area - NOT a separate page.
-// ------------------------------------------------------------
-
 class ServiceContent extends StatelessWidget {
   final ServiceData service;
-  const ServiceContent({super.key, required this.service});
+  final String? focusedFeature;
+  const ServiceContent({super.key, required this.service, this.focusedFeature});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Hero banner with gradient using the service's own color
         _FadeSlideIn(
           child: Container(
             width: double.infinity,
@@ -102,63 +96,97 @@ class ServiceContent extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 24),
 
-        // Quick stat chips row
-        _FadeSlideIn(
-          delayMs: 80,
-          child: Row(
-            children: [
-              _miniStat(
-                'Status',
-                'Active',
-                Icons.check_circle_rounded,
-                Colors.green,
+        if (focusedFeature != null) ...[
+          const SizedBox(height: 18),
+          _FadeSlideIn(
+            delayMs: 60,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: service.color.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: service.color.withOpacity(0.4)),
               ),
-              const SizedBox(width: 12),
-              _miniStat('Version', 'v1.0', Icons.tag_rounded, service.color),
-              const SizedBox(width: 12),
-              _miniStat('Uptime', '99.9%', Icons.bolt_rounded, Colors.orange),
-            ],
+              child: Row(
+                children: [
+                  Icon(Icons.bolt_rounded, color: service.color, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textInk,
+                        ),
+                        children: [
+                          const TextSpan(text: 'Viewing '),
+                          TextSpan(
+                            text: focusedFeature,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: service.color,
+                            ),
+                          ),
+                          const TextSpan(text: ' inside this module.'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 26),
+        ],
 
-        Text(
-          'Features',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Everything included in this microservice module',
-          style: TextStyle(fontSize: 12.5, color: AppColors.textGrey),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            const Text(
+              'Features',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              'Everything included in this microservice module',
+              style: TextStyle(fontSize: 11.5, color: AppColors.textGrey),
+            ),
+          ],
         ),
         const SizedBox(height: 14),
 
-        // Feature grid (2 columns on wide screens)
         LayoutBuilder(
           builder: (context, constraints) {
             final isWide = constraints.maxWidth > 700;
             final tiles = service.features.asMap().entries.map((entry) {
+              final isFocused =
+                  focusedFeature != null && entry.value == focusedFeature;
               return _FadeSlideIn(
                 delayMs: 60 * entry.key,
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isFocused
+                        ? service.color.withOpacity(0.08)
+                        : Colors.white,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: service.color.withOpacity(0.3),
-                      width: 1.2,
+                      color: isFocused
+                          ? service.color
+                          : service.color.withOpacity(0.3),
+                      width: isFocused ? 2 : 1.2,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
-                        blurRadius: 8,
+                        color: isFocused
+                            ? service.color.withOpacity(0.15)
+                            : Colors.black.withOpacity(0.02),
+                        blurRadius: isFocused ? 14 : 8,
                         offset: const Offset(0, 3),
                       ),
                     ],
@@ -168,11 +196,13 @@ class ServiceContent extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: service.color.withOpacity(0.12),
+                          color: service.color.withOpacity(
+                            isFocused ? 0.2 : 0.12,
+                          ),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
-                          Icons.check_rounded,
+                          isFocused ? Icons.star_rounded : Icons.check_rounded,
                           color: service.color,
                           size: 16,
                         ),
@@ -181,10 +211,12 @@ class ServiceContent extends StatelessWidget {
                       Expanded(
                         child: Text(
                           entry.value,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textDark,
                             fontSize: 13.5,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: isFocused
+                                ? FontWeight.w700
+                                : FontWeight.w500,
                           ),
                         ),
                       ),
@@ -206,7 +238,6 @@ class ServiceContent extends StatelessWidget {
                     .toList(),
               );
             }
-            // 2-column wrap layout
             return Wrap(
               spacing: 12,
               runSpacing: 12,
@@ -250,37 +281,6 @@ class ServiceContent extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _miniStat(String label, String value, IconData icon, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.borderGrey),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 18),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: AppColors.textDark,
-              ),
-            ),
-            Text(
-              label,
-              style: TextStyle(fontSize: 10.5, color: AppColors.textGrey),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

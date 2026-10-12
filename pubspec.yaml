@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-  provider: ^6.1.2
+  flutter_riverpod: ^2.5.1
 
 dev_dependencies:
   flutter_test:
@@ -26,3 +26,4 @@ flutter:
 
   assets:
     - assets/images/onecloud_logo.png
+    - assets/images/stackly_logo.png
